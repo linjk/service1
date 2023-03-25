@@ -14,7 +14,7 @@ spec:
         app: service1
     spec:
       containers:
-        - image: linjk/service1:<BUILD_TAG>
+        - image: linjk/service1:v1
           imagePullPolicy: IfNotPresent
           name: service1
 
