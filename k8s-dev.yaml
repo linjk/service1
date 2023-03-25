@@ -17,9 +17,7 @@ spec:
         - image: linjk/service1:<BUILD_TAG>
           imagePullPolicy: IfNotPresent
           name: service1
-          env:
-            - name: branch
-              value: <BRANCH_NAME>
+
 ---
 apiVersion: v1
 kind: Service
