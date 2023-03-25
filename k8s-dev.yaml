@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: service1
+  namespace: devlopment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: service1
+  template:
+    metadata:
+      labels:
+        app: service1
+    spec:
+      containers:
+        - image: linjk/service1:<BUILD_TAG>
+          imagePullPolicy: IfNotPresent
+          name: service1
+          env:
+            - name: branch
+              value: <BRANCH_NAME>
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: service1
+  namespace: devlopment
+spec:
+  selector:
+    app: service1
+  type: NodePort
+  ports:
+    - port: 3298
+      targetPort: 3298
+      nodePort: 32298
