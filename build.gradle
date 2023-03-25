@@ -1,0 +1,83 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'org.hidetake:gradle-ssh-plugin:2.9.0'
+    }
+}
+
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.0.2'
+    id 'io.spring.dependency-management' version '1.1.0'
+}
+
+apply plugin: 'org.hidetake.ssh'
+
+group = 'com.test'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '17'
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+
+def ENV_LIST = ["dev"]
+
+remotes {
+    webServerDev {
+        host = '192.168.175.121'
+        user = 'root'
+        password = 'ljk121121'
+    }
+}
+
+def deploy_to_server (env) {
+    ssh.settings {
+        knownHosts = allowAnyHosts
+    }
+
+    ssh.run {
+        if ("dev" == env) {
+            session(remotes.webServerDev) {
+                put from: "/Users/linjk/Documents/code/java/k8s/service1/build/libs/service1-0.0.1-SNAPSHOT.jar",
+                        into: '/root/service1'
+                execute """
+                            cd /root/service1
+                            python deploy.py
+                        """
+            }
+        }
+    }
+}
+
+tasks.register('customDeploy') {
+    doLast {
+        println("start custom deploy ...")
+        ENV_LIST.each { ev ->
+            {
+                println("deplying to env: " + ev)
+                deploy_to_server(ev)
+                println("deplying to env: " + ev + " done.")
+            }
+        }
+    }
+}
